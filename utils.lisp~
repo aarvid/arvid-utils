@@ -1,0 +1,64 @@
+(in-package :arvid-utils)
+
+(defun multi-dimensional->vectors (array &key (reverse nil))
+  "convert a multi-dimensional array into vector of vectors of ...
+   indices go from most significant to least
+   :reverse t means indices go from least significant to most"
+  (labels ((arr->vec (array dims indices)
+             (if dims
+                 (let* ((dim (car dims))
+                        (vec (make-array dim)))
+                   (dotimes (i dim)
+                     (setf (aref vec i)
+                           (arr->vec array (cdr dims) (cons i indices))))
+                   vec)
+                 (apply #'aref (cons array (funcall (if reverse #'identity #'reverse) indices))))))
+    (arr->vec array (funcall (if reverse #'reverse #'identity) (array-dimensions array)) nil)))
+
+(defun vectors->multi-dimensional (vector &key (reverse nil))
+  "convert a vector of vectors of ... into multi-dimensional array
+   indices go from most significant to least
+   :reverse t means indices go from least significant to most"
+  (labels ((vector-dimensions (vec)
+             (if (vectorp vec)
+                 (cons (length vec)
+                       (vector-dimensions (aref vec 0)))
+                 nil)))
+    (let* ((dim-list (vector-dimensions vector))
+           (array (make-array (funcall (if reverse #'reverse #'identity) dim-list))))
+      (labels ((vec->arr (vec dims indices)
+                 (if dims
+                     (dotimes (i (car dims))
+                       (vec->arr (aref vec i) (cdr dims) (cons i indices)))
+                     (setf (apply #'aref (cons array (funcall (if reverse #'identity #'reverse) indices)))
+                           vec))))
+        (vec->arr vector dim-list nil)
+        array))))
+
+
+
+;;; An acceptor that invokes the debugger on errors:
+;;; by Andreas Fuchs (hunchentoot-devel list)
+(defclass debuggable-acceptor (hunchentoot:acceptor)
+    ())
+
+(defmethod process-connection ((*acceptor* debuggable-acceptor) (socket t))
+ (declare (ignore socket))
+ (handler-bind ((error #'invoke-debugger))
+   (call-next-method)))
+
+(defmethod acceptor-request-dispatcher ((*acceptor* debuggable-acceptor))
+ (let ((dispatcher (call-next-method)))
+   (lambda (request)
+     (handler-bind ((error #'invoke-debugger))
+       (funcall dispatcher request)))))
+
+
+;;; from cl-who
+;;; Copyright (c) 2003-2008, Dr. Edmund Weitz. All rights reserved.
+(defmacro n-spaces (n)
+  "A string with N spaces - used by indentation."
+  `(make-array ,n
+               :element-type 'base-char
+               :displaced-to +spaces+
+               :displaced-index-offset 0))
