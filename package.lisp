@@ -8,4 +8,5 @@
    n-spaces
    list-of-length-p
    singlep
-   doublep))
+   doublep
+   file-string))

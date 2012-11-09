@@ -131,3 +131,13 @@
 		 (intern (make-string 1
 				      :initial-element c)))
        (symbol-name sym)))
+
+;; http://www.cl-user.net/asp/en9o/sdataQvUv$7E2RujsDQ3YNypX8yBX8yBXnMq=/sdataQu3F$sSHnB==
+;; How to read and process a file -- marc.battyani 
+(defun file-string (path)
+  "Sucks up an entire file from PATH into a freshly-allocated string,
+      returning two values: the string and the number of bytes read."
+  (with-open-file (s path)
+    (let* ((len (file-length s))
+           (data (make-string len)))
+      (values data (read-sequence data s)))))
