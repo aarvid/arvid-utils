@@ -115,6 +115,21 @@
 
 
 
+;; on-lisp ch 4.3
+(defun group (source n)
+  (if (zerop n) (error "zero length"))
+  (labels ((rec (source acc)
+             (let ((rest (nthcdr n source)))
+               (if (consp rest)
+                   (rec rest (cons (subseq source 0 n) acc))
+                   (nreverse (cons source acc))))))
+    (if source (rec source nil) nil)))
+
+;; quickutils.
+(defun weave (&rest lists)
+  (apply #'mapcan #'list lists))
+
+
 ;; onlisp 4.7 Symbols and Strings
 (defun mkstr (&rest args)
   (with-output-to-string (s)
