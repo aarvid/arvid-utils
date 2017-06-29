@@ -1,12 +1,6 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10 -*-
 
-(defpackage #:arvid-utils-asd
-  (:use :cl :asdf))
-
-(in-package :arvid-utils-asd)
-
-(defsystem arvid-utils
-  :name "arvid-utils"
+(asdf:defsystem "arvid-utils"
   :version "0.0.0"
   :maintainer "A. Peterson"
   :author "Andy Peterson"
